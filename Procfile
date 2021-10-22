@@ -1,1 +1,1 @@
-Worker: node InterManager.js
+worker: node InterManager.js
