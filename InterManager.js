@@ -478,7 +478,6 @@ client.on('emojiCreate', async (emoji) => {
   })
 
 
-
 client.on('emojiDelete', async (emoji) => {
   const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_DELETE'}).then(audit => audit.entries.first()).catch()
   let author;
@@ -560,7 +559,6 @@ client.on('emojiDelete', async (emoji) => {
     })
   }
   })
-
 
 
 client.on('emojiUpdate', async (emoji, emojiTooButTheNewOne) => {
@@ -964,7 +962,6 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   if (await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)) == undefined) return;
   {
 
-
     let newRolesnumber = newMember.roles.cache.map(r => r.toString()).length
     let oldRolesnumber = oldMember.roles.cache.map(r => r.toString()).length
 
@@ -1002,6 +999,9 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
       .setTimestamp()
     
       client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)).send(guildMemberUpdateLogEmbed);
+
+
+      if (oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
     } 
     if (entry.changes[0].key == '$add')
     {
@@ -1408,7 +1408,7 @@ client.on('roleUpdate', async (oldRole, newRole) => {
 client.on('messageDelete', async (message) => 
 {
   //console.log(message)
-  await db.set(`lastMessageDeletedInChannel${message.channel.id}`, [message.content, message.author])
+  await db.set(`lastMessageDeletedInChannel${message.channel.id}`, [message.content, message.author, message.attachments.first()])
   setTimeout(async function()
   { 
     await db.set(`lastMessageDeletedInChannel${message.channel.id}`, null)
@@ -1865,7 +1865,7 @@ client.on("message", async (message) => {
           if (!message.member.hasPermission('MANAGE_GUILD')) return sendWithWebhookCheck(message.channel, translating(language, {english: "You don't have permission to change the prefix! (This action requires `Manage Server` permission.)", polish: "Nie możesz zmienić prefix'u bota! (Wymaga to premisji `Zarządzanie serwerem`.)"}));
           await db.set(`prefix_${message.guild.id}`, arguments)
           sendWithWebhookCheck(message.channel, translating(language, {english: "The bot's prefix has been set to `" + arguments + "`!", polish: "Ustawiono prefix bota na `" + arguments + "`!"}))
-          message.guild.me.setNickname(`[${arguments}] InterManager`)
+          message.guild.me.setNickname(`[${arguments}] ${client.user.username}`)
         } else 
         {
           sendWithWebhookCheck(message.channel, translating(language, {english: "The prefix can include only one parameter!", polish: "Prefix może składać się tylko z jednego parametru!"}))
@@ -2021,7 +2021,7 @@ client.on("message", async (message) => {
       }
 
 
-      else if (primaryCommand.toLowerCase() == prefix + "snipe")
+      else if (primaryCommand.toLowerCase() == prefix + "snipe" || primaryCommand.toLowerCase() == prefix + "s")
       {
         let deletedMessageData = await db.fetch(`lastMessageDeletedInChannel${message.channel.id}`)
         if (deletedMessageData == null || deletedMessageData == undefined)
@@ -2037,6 +2037,7 @@ client.on("message", async (message) => {
         }
         //console.log(deletedMessageData)
         let author = deletedMessageData[1]
+        let attachment = deletedMessageData[2]
         let messageContent;
         if (deletedMessageData[0].size >= 1000)
         {
@@ -2050,10 +2051,12 @@ client.on("message", async (message) => {
         const embed = new Discord.MessageEmbed()
         .setColor('#0099ff')
         .setTitle(`Message by ${author.tag}:`)
-        .setDescription(messageContent)
         .setThumbnail(author.avatarURL)
         .setTimestamp()
         .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+
+        if (messageContent != "" && messageContent != null && messageContent != undefined) embed.setDescription(messageContent)
+        if (attachment != undefined && attachment != null && (attachment.url.endsWith(".png") || attachment.url.endsWith(".jpg") || attachment.url.endsWith(".gif"))) embed.setImage(attachment.url)
       
       sendWithWebhookCheck(message.channel, embed);
       }
@@ -3415,21 +3418,19 @@ client.on("message", async (message) => {
       else if (primaryCommand.toLowerCase() == prefix + "give-money") 
       {
         let commandName = "Give-money"
-        if (await db.fetch(`globalSlowmodeOfCommand${commandName}ForMember${message.author.id}`) == null ) 
+        if (await db.fetch(`globalSlowmodeOfCommand${commandName}ForMember${message.author.id}`) == null) 
         {
           await db.set(`globalSlowmodeOfCommand${commandName}ForMember${message.author.id}`, 0)
         }
         if (await db.fetch(`globalSlowmodeOfCommand${commandName}ForMember${message.author.id}`) != 0 ) return sendWithWebhookCheck(message.channel, `This command is in slowmode! Wait ${await db.fetch(`globalSlowmodeOfCommand${commandName}ForMember${message.author.id}`)} more seconds.`)
         if (arguments.length != 2) return sendWithWebhookCheck(message.channel, `Incorrect number of arguments! Correct usage: \n\`[prefix]give-money [mention] [number]\``)
-        let theMember = message.mentions.members.first().id;
         var moneyToGive = parseInt(arguments[1])
         if (isNaN(moneyToGive)) return sendWithWebhookCheck(message.channel, `Incorrect money to give value! Correct usage: \n\`[prefix]give-money [mention] [number]\``)
         if (moneyToGive <= 0) return sendWithWebhookCheck(message.channel, 'number of money to give must be higher than 0!')
         var givingsMoney = await db.fetch(`moneyOfMember${message.member.id}`)
-        var receivingsMoney = await db.fetch(`moneyOfMember${theMember}`)
         if (givingsMoney < moneyToGive) return sendWithWebhookCheck(message.channel, 'You don\'t have so much money!')
-        await db.set(`moneyOfMember${theMember}`, receivingsMoney + moneyToGive)
-        await db.set(`moneyOfMember${message.member.id}`, givingsMoney - moneyToGive)
+        addMoney(message.mentions.members.first().user, moneyToGive)
+        addMoney(message.author, -moneyToGive)
         sendWithWebhookCheck(message.channel, `${message.member} gave ${message.mentions.members.first()} ${moneyToGive}$!`)
         globalSlowmode(message, commandName, 10)
       } 
@@ -3481,26 +3482,23 @@ client.on("message", async (message) => {
 
           globalSlowmode(message, commandName, 15)
 
-          msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '✊' || reaction.emoji.name == '✋' || reaction.emoji.name == '✌️'),
+          msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '✊' || reaction.emoji.name == '✋' || reaction.emoji.name == '✌️' || reaction.emoji.name == '💣' || reaction.emoji.name == '🧨' || reaction.emoji.name == '⛏️' || reaction.emoji.name == '🔨' || reaction.emoji.name == '🪓'),
           { max: 1, time: 30000 }).then(async function(collected) {
+            playersMove = collected.first().emoji.name
                   if (collected.first().emoji.name == '✊') 
                   {
-                    playersMove = '✊'
                     playersMoveIndex = 1
                   }
-                  if (collected.first().emoji.name == '✋') 
+                  if (collected.first().emoji.name == '✋')
                   {
-                    playersMove = '✋'
                     playersMoveIndex = 2
                   }
                   if (collected.first().emoji.name == '✌️') 
                   {
-                    playersMove = '✌️'
                     playersMoveIndex = 3
                   }
                   let player = message.author.tag
                   let opponent = msg.author.tag
-                  var money = await db.fetch(`moneyOfMember${message.member.id}`)
                   msg.reactions.removeAll()
 
                   if (playersMoveIndex == opponentsMoveIndex)
@@ -3509,7 +3507,7 @@ client.on("message", async (message) => {
                   }
                   if ((playersMoveIndex == 1 && opponentsMoveIndex == 3) || (playersMoveIndex == 3 && opponentsMoveIndex == 1)) 
                   {
-                    if(playersMoveIndex < opponentsMoveIndex) 
+                    if(playersMoveIndex < opponentsMoveIndex  || "💣 🧨 ⛏️ 🔨 🪓".includes(collected.first().emoji.name)) 
                     {
                       rpsWinner = `🏆 ${player} wins and earns 100$! 🏆`
                       addMoney(message.author, 100)
@@ -3522,7 +3520,7 @@ client.on("message", async (message) => {
                   } 
                   else
                   {
-                    if(opponentsMoveIndex < playersMoveIndex) 
+                    if(opponentsMoveIndex < playersMoveIndex || "💣 🧨 ⛏️ 🔨 🪓".includes(collected.first().emoji.name)) 
                     {
                       rpsWinner = `🏆 ${player} wins and earns 100$! 🏆`
                       addMoney(message.author, 100)
@@ -5675,8 +5673,5 @@ client.on("message", async (message) => {
 
 
 
-
-//client.login("")
 client.login(config.token)
-
-// node InterManager.js
+//"token": "OTAxNTI5NjczMjI0MzA2Nzk4.YXRM7w.h7P_KMakBLx_Vkjs5ubuimv8veY"
