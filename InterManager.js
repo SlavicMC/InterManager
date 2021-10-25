@@ -5673,5 +5673,5 @@ client.on("message", async (message) => {
 
 
 
-client.login(config.token)
+client.login("ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.MUyyUgEm7CJbtKeqVbXbDEFSOZk")
 //"token": "OTAxNTI5NjczMjI0MzA2Nzk4.YXRM7w.h7P_KMakBLx_Vkjs5ubuimv8veY"
