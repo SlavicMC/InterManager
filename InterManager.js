@@ -959,6 +959,7 @@ client.on("guildMemberRemove", async (member) =>
 
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
+  if (oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
   if (await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)) == undefined) return;
   {
 
@@ -999,9 +1000,6 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
       .setTimestamp()
     
       client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)).send(guildMemberUpdateLogEmbed);
-
-
-      if (oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
     } 
     if (entry.changes[0].key == '$add')
     {
