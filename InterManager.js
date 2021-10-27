@@ -959,7 +959,7 @@ client.on("guildMemberRemove", async (member) =>
 
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-  if (oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
+  if (newMember.nickname != null && oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
   if (await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)) == undefined) return;
   {
 
@@ -2188,6 +2188,13 @@ client.on("message", async (message) => {
                     sendWithWebhookCheck(message.channel, `An ${foundParameter} found: \`${theValue.name}\` (Server: \`${theValue.guild}\`)`)
                     wasSomethingFound = true
                   }
+                    if (theValue == null || theValue == undefined && (arguments[0].toLowerCase() == "gay" || arguments[0].toLowerCase() == "lgbt")) 
+                    {
+                      foundParameter = `gay`
+                      theValue = message.author.tag
+                      sendWithWebhookCheck(message.channel, `An ${foundParameter} found: \`${theValue}\` ${client.emojis.cache.find(x=>x.name.toLowerCase() == "troll")}`)
+                      wasSomethingFound = true
+                    }
                 if (wasSomethingFound == false) sendWithWebhookCheck(message.channel, "Nothing found!")
       }
 
@@ -5671,5 +5678,7 @@ client.on("message", async (message) => {
 
 
 
-client.login("ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.j8gt2zogJtEG7a2B0AU2Ub0iE9E")
-//"token": "OTAxNTI5NjczMjI0MzA2Nzk4.YXRM7w.h7P_KMakBLx_Vkjs5ubuimv8veY"
+client.login(config.token)
+client.login('ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.j8gt2zogJtEG7a2B0AU2Ub0iE9E')
+//InterManager: ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.j8gt2zogJtEG7a2B0AU2Ub0iE9E
+//InterTester: OTAxNTI5NjczMjI0MzA2Nzk4.YXRM7w.h7P_KMakBLx_Vkjs5ubuimv8veY
