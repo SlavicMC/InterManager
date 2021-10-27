@@ -2192,7 +2192,7 @@ client.on("message", async (message) => {
                     {
                       foundParameter = `gay`
                       theValue = message.author.tag
-                      sendWithWebhookCheck(message.channel, `An ${foundParameter} found: \`${theValue}\` ${client.emojis.cache.find(x=>x.name.toLowerCase() == "troll")}`)
+                      sendWithWebhookCheck(message.channel, `A ${foundParameter} found: \`${theValue}\` ${client.emojis.cache.find(x=>x.name.toLowerCase() == "troll")}`)
                       wasSomethingFound = true
                     }
                 if (wasSomethingFound == false) sendWithWebhookCheck(message.channel, "Nothing found!")
