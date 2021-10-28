@@ -7,7 +7,6 @@ let client = new Discord.Client()
 
 console.log("Running...")
 
-
 client.on('ready', async () => {
     console.log("Connected as " + client.user.tag)
 
