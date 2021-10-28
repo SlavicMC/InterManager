@@ -2188,7 +2188,7 @@ client.on("message", async (message) => {
                     sendWithWebhookCheck(message.channel, `An ${foundParameter} found: \`${theValue.name}\` (Server: \`${theValue.guild}\`)`)
                     wasSomethingFound = true
                   }
-                    if (theValue == null || theValue == undefined && (arguments[0].toLowerCase() == "gay" || arguments[0].toLowerCase() == "lgbt")) 
+                    if (wasSomethingFound && (theValue == null || theValue == undefined) && (arguments[0].toLowerCase() == "gay" || arguments[0].toLowerCase() == "lgbt")) 
                     {
                       foundParameter = `gay`
                       theValue = message.author.tag
