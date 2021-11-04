@@ -5677,7 +5677,7 @@ client.on("message", async (message) => {
 
 
 
-client.login(config.token)
+//client.login(config.token)
 client.login('ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.j8gt2zogJtEG7a2B0AU2Ub0iE9E')
 //InterManager: ODMxMTAxNDk2MzE3ODM3MzQ1.YHQVlQ.j8gt2zogJtEG7a2B0AU2Ub0iE9E
 //InterTester: OTAxNTI5NjczMjI0MzA2Nzk4.YXRM7w.h7P_KMakBLx_Vkjs5ubuimv8veY
