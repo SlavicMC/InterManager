@@ -2942,7 +2942,30 @@ client.on("messageCreate", async (message) => {
         .setTimestamp()
         .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
       
-      sendWithWebhookCheck(message.channel, embed);
+      sendWithWebhookCheck(message.channel, embed)
+      .then((msg) => 
+      {
+        msg.react('🪧').catch()
+
+        let filter = (reaction, user) => 
+        {
+          return user.id == message.author.id && '🪧'.includes(reaction.emoji.name);
+        };
+
+        msg.awaitReactions({filter, max: 1, time: 30000 }).then(async function(collected) 
+        {
+          if(collected == undefined)
+          {
+            msg.reactions.removeAll()
+            return;
+          }
+          else
+          {
+            msg.reactions.removeAll()
+            sendWithWebhookCheck(message.channel, readyLa + "\n" + readyGg)
+          }
+        })
+      })
       }
 
 
