@@ -2962,7 +2962,8 @@ client.on("messageCreate", async (message) => {
           else
           {
             msg.reactions.removeAll()
-            sendWithWebhookCheck(message.channel, readyLa + "\n" + readyGg)
+            sendWithWebhookCheck(message.channel, readyLa)
+            sendWithWebhookCheck(message.channel, readyGg)
           }
         })
       })
