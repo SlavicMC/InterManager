@@ -52,7 +52,7 @@ client.on('channelCreate', async (channel) => {
   if (channel.guild === null || channel.guild === undefined) return;
   let actionName = 'ChannelCreate'
   serverStatsUpdate(channel.guild, actionName)
-    const entry = await channel.guild.fetchAuditLogs({type: 'CHANNEL_CREATE'}).then(audit => audit.entries.first()).catch()
+    const entry = await channel.guild.fetchAuditLogs({type: 'CHANNEL_CREATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     let author;
     let wasBotUsed = false;
     if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -188,7 +188,7 @@ client.on('channelCreate', async (channel) => {
 client.on('channelDelete', async (channel) => {
   let actionName = 'ChannelDelete'
   serverStatsUpdate(channel.guild, actionName)
-  const entry = await channel.guild.fetchAuditLogs({type: 'CHANNEL_DELETE'}).then(audit => audit.entries.first()).catch()
+  const entry = await channel.guild.fetchAuditLogs({type: 'CHANNEL_DELETE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -272,7 +272,7 @@ client.on('channelDelete', async (channel) => {
 
 
 client.on('channelUpdate', async (oldChannel, newChannel) => {
-  const entry = await oldChannel.guild.fetchAuditLogs({type: 'CHANNEL_UPDATE'}).then(audit => audit.entries.first()).catch()
+  const entry = await oldChannel.guild.fetchAuditLogs({type: 'CHANNEL_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   //console.log(entry.reason)
   let author;
   let wasBotUsed = false;
@@ -402,7 +402,7 @@ client.on('channelUpdate', async (oldChannel, newChannel) => {
 
 
 client.on('emojiCreate', async (emoji) => {
-  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_CREATE'}).then(audit => audit.entries.first()).catch()
+  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_CREATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -479,13 +479,13 @@ client.on('emojiCreate', async (emoji) => {
       {
         fastActionsUse(theEmbed, emoji.guild, authorToSend, actionName, emoji, 0)
       }
-    }).catch();
+    }).catch(error => {console.log(error)});
   }
   })
 
 
 client.on('emojiDelete', async (emoji) => {
-  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_DELETE'}).then(audit => audit.entries.first()).catch()
+  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_DELETE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -568,7 +568,7 @@ client.on('emojiDelete', async (emoji) => {
 
 
 client.on('emojiUpdate', async (emoji, emojiTooButTheNewOne) => {
-  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_UPDATE'}).then(audit => audit.entries.first()).catch()
+  const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -654,7 +654,7 @@ client.on('emojiUpdate', async (emoji, emojiTooButTheNewOne) => {
   }
           /*if (await db.fetch(`idOfLoggingChannelOfServer${emoji.guild.id}`) != null && client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${emoji.guild.id}`)) != undefined) 
           {
-            const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_UPDATE'}).then(audit => audit.entries.first()).catch()
+            const entry = await emoji.guild.fetchAuditLogs({type: 'EMOJI_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
             author = entry.executor;
             //console.log(entry.changes[0])
             //console.log(channel)
@@ -684,7 +684,7 @@ client.on('guildBanAdd', async (ban) => {
   let guild = ban.guild;
   let user = ban.user;
   serverStatsUpdate(guild, actionName);
-  const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first()).catch();
+  const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first()).catch(error => {console.log(error)});
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -760,7 +760,7 @@ client.on('guildBanAdd', async (ban) => {
 
   /*if (await db.fetch(`idOfLoggingChannelOfServer${guild.id}`) != null && client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${guild.id}`)) != undefined) 
   {
-    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first()).catch()
+    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     author = entry.executor;
     //console.log(channel)
     const channelCreateLogEmbed = new Discord.MessageEmbed()
@@ -785,7 +785,7 @@ client.on("guildBanRemove", async (ban) =>
     let guild = ban.guild;
     let user = ban.user;
     serverStatsUpdate(guild, actionName)
-    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first()).catch()
+    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     let author;
     let wasBotUsed = false;
     if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -860,7 +860,7 @@ client.on("guildBanRemove", async (ban) =>
     
 
     /*if (await db.fetch(`idOfLoggingChannelOfServer${guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${guild.id}`)) == undefined) return;
-    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first()).catch()
+    const entry = await guild.fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     author = entry.executor;
     //console.log(channel)
     const guildBanRemoveLogEmbed = new Discord.MessageEmbed()
@@ -973,7 +973,7 @@ client.on("guildMemberRemove", async (member) =>
 
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-  if (newMember.nickname != null && oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch()
+  if (newMember.nickname != null && oldMember.id == client.user.id && newMember.nickname.toLowerCase() == "nuker") newMember.setNickname("I'M NOT A NUKER 😡😡😡").catch(error => {console.log(error)})
   if (await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${oldMember.guild.id}`)) == undefined) return;
   {
 
@@ -985,11 +985,11 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     let entry;
     if(oldMember.nickname != newMember.nickname) 
     {
-      entry = await oldMember.guild.fetchAuditLogs({type: 'MEMBER_UPDATE'}).then(audit => audit.entries.first()).catch()
+      entry = await oldMember.guild.fetchAuditLogs({type: 'MEMBER_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     } 
     else 
     {
-      entry = await oldMember.guild.fetchAuditLogs({type: 'MEMBER_ROLE_UPDATE'}).then(audit => audit.entries.first()).catch()
+      entry = await oldMember.guild.fetchAuditLogs({type: 'MEMBER_ROLE_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     }
 
     author = entry.executor;
@@ -1063,7 +1063,7 @@ client.on('roleCreate', async (role) => {
   if (role.guild === null || role.guild === undefined) return;
   let actionName = 'RoleCreate'
   serverStatsUpdate(role.guild, actionName)
-    const entry = await role.guild.fetchAuditLogs({type: 'ROLE_CREATE'}).then(audit => audit.entries.first()).catch()
+    const entry = await role.guild.fetchAuditLogs({type: 'ROLE_CREATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     let author;
     let wasBotUsed = false;
     if (role.managed == true) return;
@@ -1142,7 +1142,7 @@ client.on('roleCreate', async (role) => {
 
   
     /*if (await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`) == null && client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`)) == undefined) return;
-      const entry = await role.guild.fetchAuditLogs({type: 'ROLE_CREATE'}).then(audit => audit.entries.first()).catch()
+      const entry = await role.guild.fetchAuditLogs({type: 'ROLE_CREATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
       author = entry.executor;
       //console.log(channel)
       const roleCreateLogEmbed = new Discord.MessageEmbed()
@@ -1166,7 +1166,7 @@ client.on('roleDelete', async (role) => {
   if (role.guild === null || role.guild === undefined) return;
   let actionName = 'RoleDelete'
   serverStatsUpdate(role.guild, actionName)
-    const entry = await role.guild.fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first()).catch()
+    const entry = await role.guild.fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
     let author;
     let wasBotUsed = false;
     if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -1247,7 +1247,7 @@ client.on('roleDelete', async (role) => {
 
 
     /*if (await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`) == null && client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`)) == undefined) return;
-        const entry = await role.guild.fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first()).catch()
+        const entry = await role.guild.fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
         author = entry.executor;
         //console.log(channel)
         const roleDeleteLogEmbed = new Discord.MessageEmbed()
@@ -1267,7 +1267,7 @@ client.on('roleDelete', async (role) => {
 
 client.on('roleUpdate', async (oldRole, newRole) => {
   
-  const entry = await oldRole.guild.fetchAuditLogs({type: 'ROLE_UPDATE'}).then(audit => audit.entries.first()).catch()
+  const entry = await oldRole.guild.fetchAuditLogs({type: 'ROLE_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   //console.log(entry.reason)
   let author;
   let wasBotUsed = false;
@@ -1396,7 +1396,7 @@ client.on('roleUpdate', async (oldRole, newRole) => {
   
       /*if (await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`) == null || client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${role.guild.id}`)) == undefined) return;
       
-        const entry = await role.guild.fetchAuditLogs({type: 'ROLE_UPDATE'}).then(audit => audit.entries.first()).catch()
+        const entry = await role.guild.fetchAuditLogs({type: 'ROLE_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
         author = entry.executor;
         //console.log(entry.changes[0].key)
         //console.log(channel)
@@ -1653,7 +1653,6 @@ client.on("messageCreate", async (message) => {
 
 
 
-
       if (primaryCommand.toLowerCase() == prefix + "check") 
       {
         sendWithWebhookCheck(message.channel, translating(language, {english: `Check: \n Prefix: ${prefix} \n Primary command: ${primaryCommand} \n Arguments: ${argumentsNotSplited} \n Arguments' length: ${arguments.length} \n Author: ${message.author.tag}`, polish: `Sprawdzenie: \n Prefix: ${prefix} \n Primary command: ${primaryCommand} \n Arguments: ${argumentsNotSplited} \n Arguments' length: ${arguments.length} \n Author: ${message.author.tag}`}))
@@ -1665,7 +1664,7 @@ client.on("messageCreate", async (message) => {
         if (await db.fetch(`adminsOfBot`).includes(message.author.id) == false) return
         (await message.guild.members.fetch()).forEach(m => 
           {
-            if (!m.user.bot) m.user.send(argumentsNotSplited).catch()
+            if (!m.user.bot) m.user.send(argumentsNotSplited).catch(error => {console.log(error)})
           })
       }
 
@@ -1757,11 +1756,11 @@ client.on("messageCreate", async (message) => {
         {
           //🇭🇷
           msg.react('🏴󠁧󠁢󠁥󠁮󠁧󠁿')
-          .then(msg.react('🇵🇱').catch())
-          .then(msg.react('🇰🇷').catch())
-          .then(msg.react('🇭🇷').catch())
-          .then(msg.react('🇭🇺').catch())
-          .then(msg.react('🇱🇹').catch()).catch()
+          .then(msg.react('🇵🇱').catch(error => {console.log(error)}))
+          .then(msg.react('🇰🇷').catch(error => {console.log(error)}))
+          .then(msg.react('🇭🇷').catch(error => {console.log(error)}))
+          .then(msg.react('🇭🇺').catch(error => {console.log(error)}))
+          .then(msg.react('🇱🇹').catch(error => {console.log(error)})).catch(error => {console.log(error)})
 
           let filter = (reaction, user) => 
           {
@@ -1772,13 +1771,13 @@ client.on("messageCreate", async (message) => {
           {
             if(collected.first() == undefined) 
             {
-              msg.reactions.removeAll().catch()
+              msg.reactions.removeAll().catch(error => {console.log(error)})
               let embed = new Discord.MessageEmbed()
               .setColor('#FF0000')
               .setTitle('Operation cancelled!')
               .setTimestamp()
               .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
-              msg.editWithWebhookCheck(embed).catch()
+              msg.editWithWebhookCheck(embed).catch(error => {console.log(error)})
               return;
             }
             else if (collected.first().emoji.name == '🏴󠁧󠁢󠁥󠁮󠁧󠁿') await db.set(`languageOfServer${message.guild.id}`, "english")
@@ -1787,7 +1786,7 @@ client.on("messageCreate", async (message) => {
             else if (collected.first().emoji.name == '🇰🇷') await db.set(`languageOfServer${message.guild.id}`, "korean")
             else if (collected.first().emoji.name == '🇭🇺') await db.set(`languageOfServer${message.guild.id}`, "hungarian")
             else if (collected.first().emoji.name == '🇱🇹') await db.set(`languageOfServer${message.guild.id}`, "lithuanian")
-            msg.reactions.removeAll().catch()
+            msg.reactions.removeAll().catch(error => {console.log(error)})
 
             language = await db.fetch(`languageOfServer${message.guild.id}`)
 
@@ -1797,9 +1796,9 @@ client.on("messageCreate", async (message) => {
             .setDescription(translating(language, {english: `**Server language set to English!**`, polish: `**Ustawiono język serwera na Polski!**`, croatian: `**Jezik servera je postavljen na Hrvatski!**`, korean: `**서버 언어가 한국어로 세팅되었습니다!**`, hungarian: `**A szerver nyelve Magyarra lett változtatva!**`, lithuanian: `**Serverio kalba pakeista į lietuvių!**`}))
             .setTimestamp()
             .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`, korean: `${primaryCommand} ${message.author.tag} 가 세팅함`, hungarian: `${primaryCommand} ${message.author.tag} által`}), message.author.avatarURL());
-            msg.editWithWebhookCheck(embed).catch()
+            msg.editWithWebhookCheck(embed).catch(error => {console.log(error)})
           })
-        }).catch()
+        }).catch(error => {console.log(error)})
       }
 
 
@@ -1812,7 +1811,7 @@ client.on("messageCreate", async (message) => {
         if (isNaN(numberOfMessagesToDelete)) return sendWithWebhookCheck(message.channel,  translating(language, {english: "Enter a valid number! \nCorrect usage: `[prefix]clear [number of messages to delete (1-100)]`\nExample: `.clear 5`", polish: "Wprowadź liczbę wiadomości do usunięcia! \nPoprawne użycie: `[prefix]clear [liczba wiadomości do usunięcia (1-100)]`\nPrzykład:: `.clear 5`"}));
         if (numberOfMessagesToDelete <= 0 || 100 < numberOfMessagesToDelete) return sendWithWebhookCheck(message.channel,  translating(language, {english: "Incorrect number of messages to delete! \nCorrect usage: `[prefix]clear [number of messages to delete (1-100)]`\nExample: `.clear 5`", polish: "Wprowadzono niepoprawną liczbę wiadomości do usunięcia! \nPoprawne użycie: `[prefix]clear [liczba wiadomości do usunięcia (1-100)]`\nPrzykład:: `.clear 5`"}));
         var messagesToDeleteTogether = numberOfMessagesToDelete;
-        await message.delete().catch();
+        await message.delete().catch(error => {console.log(error)});
         message.channel.bulkDelete(messagesToDeleteTogether).then(async function() {
           sendWithWebhookCheck(message.channel,  translating(language, {english: "Deleted `" + messagesToDeleteTogether + "` messages!", polish: "Usunięto `" + messagesToDeleteTogether + "` wiadomości!"}))
           .then(function(msg) 
@@ -2586,6 +2585,256 @@ client.on("messageCreate", async (message) => {
       }
 
 
+      else if (primaryCommand.toLowerCase() == prefix + "mass-fonting" || primaryCommand.toLowerCase() == prefix + "mfn")
+      {
+        if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) return sendWithWebhookCheck(message.channel, `You don't have manage channels permission!`)
+        if (!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) return sendWithWebhookCheck(message.channel, `I don't have manage channels permission!`)
+
+        let newFontIndex 
+        let fontingStyle 
+        let embed = new Discord.MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle(`Fonting of ${message.author.tag}: `)
+        .setDescription(`**Pick the font:**\n1️⃣ - 𝐀𝐚𝐁𝐛𝐂𝐜\n2️⃣ - 𝕬𝖆𝕭𝖇𝕮𝖈\n3️⃣ - 𝒜𝒶𝐵𝒷𝒞𝒸\n4️⃣ - 𝗔𝗮𝗕𝗯𝗖𝗰\n⛔ - cancel`)
+        .setTimestamp()
+        .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+        message.channel.send({embeds: [embed]})
+        .then(async function(msg) {
+
+          msg.react('1️⃣')
+          .then(msg.react('2️⃣'))
+          .then(msg.react('3️⃣'))
+          .then(msg.react('4️⃣'))
+          .then(msg.react('⛔'))
+
+          let filter = (reaction, user) => 
+          {
+            return user.id == message.author.id && '1️⃣2️⃣3️⃣4️⃣⛔'.includes(reaction.emoji.name);
+          };
+
+          msg.awaitReactions({filter, max: 1, time: 30000 })
+          .then(async function(collected) {
+            if (collected.first().emoji.name == '1️⃣') 
+            {
+              newFontIndex = 1
+            }
+            else if (collected.first().emoji.name == '2️⃣') 
+            {
+              newFontIndex = 2
+            }
+            else if (collected.first().emoji.name == '3️⃣') 
+            {
+              newFontIndex = 3
+            }
+            else if (collected.first().emoji.name == '4️⃣') 
+            {
+              newFontIndex = 4
+            }
+            else if (collected.first().emoji.name == '⛔') 
+            {
+              msg.reactions.removeAll()
+              const endEmbed = new Discord.MessageEmbed()
+              .setColor('#FF0000')
+              .setTitle('Operation cancelled!')
+              .setTimestamp()
+              .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+            
+              msg.edit({embeds: [endEmbed]})
+              return;
+            }
+
+            msg.reactions.removeAll()
+            let embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Fonting of ${message.author.tag}: `)
+            .setDescription(`**Pick the fonting type:**\n🇸 - small (general-chat)\n🇨 - capital (GENERAL-CHAT)\n🇧 - beginning (General-chat)\n🇦 - all beginnings (General-Chat)\n⛔ - cancel`)
+            .setTimestamp()
+            .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+            msg.edit({embeds: [embed]})
+            .then(async function(msg)
+            {
+              msg.react('🇸')
+              .then(msg.react('🇨'))
+              .then(msg.react('🇧'))
+              .then(msg.react('🇦'))
+              .then(msg.react('⛔'))
+
+              filter = (reaction, user) => 
+              {
+                return user.id == message.author.id && (reaction.emoji.name == '🇸' || reaction.emoji.name == '🇨' || reaction.emoji.name == '🇧' || reaction.emoji.name == '🇦' || reaction.emoji.name == '⛔');
+              };
+
+              msg.awaitReactions({ filter, max: 1, time: 30000 })
+              .then(async function(collected) 
+              {
+                if (collected.first().emoji.name == '🇸')
+                {
+                  fontingStyle = "small"
+                }
+                else if (collected.first().emoji.name == '🇨')
+                {
+                  fontingStyle = "capital"
+                }
+                else if (collected.first().emoji.name == '🇧')
+                {
+                  fontingStyle = "beginning"
+                }
+                else if (collected.first().emoji.name == '🇦')
+                {
+                  fontingStyle = "all beginnings"
+                }
+                else if (collected.first().emoji.name == '⛔') 
+                {
+                  msg.reactions.removeAll()
+                  const endEmbed = new Discord.MessageEmbed()
+                  .setColor('#FF0000')
+                  .setTitle('Operation cancelled!')
+                  .setTimestamp()
+                  .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+                
+                  msg.edit({embeds: [endEmbed]})
+                  return;
+                }
+
+                msg.reactions.removeAll()
+                let textToFont = message.channel.name
+                let splitTextToFont = textToFont.split("")
+                let newFontCapital
+                let newFontSmall
+                let capitals
+                let normalCapitalFont = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                let normalSmallFont = "abcdefghijklmnopqrstuvwxyz"
+                let font1 = {small: ["𝐚", "𝐛", "𝐜", "𝐝", "𝐞", "𝐟", "𝐠", "𝐡", "𝐢", "𝐣", "𝐤", "𝐥", "𝐦", "𝐧", "𝐨", "𝐩", "𝐪", "𝐫", "𝐬", "𝐭", "𝐮", "𝐯", "𝐰", "𝐱", "𝐲", "𝐳"], capital: ["𝐀", "𝐁" ,"𝐂", "𝐃", "𝐄", "𝐅", "𝐆", "𝐇", "𝐈", "𝐉", "𝐊", "𝐋", "𝐌", "𝐍", "𝐎", "𝐏", "𝐐", "𝐑", "𝐒", "𝐓", "𝐔", "𝐕", "𝐖", "𝐗", "𝐘", "𝐙"]}
+                let font2 = {small: ["𝖆", "𝖇", "𝖈", "𝖉", "𝖊", "𝖋", "𝖌", "𝖍", "𝖎", "𝖏", "𝖐", "𝖑", "𝖒", "𝖓", "𝖔", "𝖕", "𝖖", "𝖗", "𝖘", "𝖙", "𝖚", "𝖛", "𝖜", "𝖝", "𝖞", "𝖟"], capital: ["𝕬", "𝕭", "𝕮", "𝕯", "𝕰", "𝕱", "𝕲", "𝕳", "𝕴", "𝕵", "𝕶", "𝕷", "𝕸", "𝕹", "𝕺", "𝕻", "𝕼", "𝕽", "𝕾", "𝕿", "𝖀", "𝖁", "𝖂", "𝖃", "𝖄", "𝖅"]}
+                let font3 = {small: ["𝒶", "𝒷", "𝒸", "𝒹", "𝑒", "𝒻", "𝑔", "𝒽", "𝒾", "𝒿", "𝓀", "𝓁", "𝓂", "𝓃", "𝑜", "𝓅", "𝓆", "𝓇", "𝓈", "𝓉", "𝓊", "𝓋", "𝓌", "𝓍", "𝓎", "𝓏"], capital: ["𝒜", "𝐵", "𝒞", "𝒟", "𝐸", "𝐹", "𝒢", "𝐻", "𝐼", "𝒥", "𝒦", "𝐿", "𝑀", "𝒩", "𝒪", "𝒫", "𝒬", "𝑅", "𝒮", "𝒯", "𝒰", "𝒱", "𝒲", "𝒳", "𝒴", "𝒵"]}
+                let font4 = {small: ["𝗮", "𝗯", "𝗰", "𝗱", "𝗲", "𝗳", "𝗴", "𝗵", "𝗶", "𝗷", "𝗸", "𝗹", "𝗺", "𝗻", "𝗼", "𝗽", "𝗾", "𝗿", "𝘀", "𝘁", "𝘂", "𝘃", "𝘄", "𝘅", "𝘆", "𝘇"], capital: ["𝗔", "𝗕", "𝗖", "𝗗", "𝗘", "𝗙", "𝗚", "𝗛", "𝗜", "𝗝", "𝗞", "𝗟", "𝗠", "𝗡", "𝗢", "𝗣", "𝗤", "𝗥", "𝗦", "𝗧", "𝗨", "𝗩", "𝗪", "𝗫", "𝗬", "𝗭"]}
+                let newName = ""
+                if (newFontIndex == 1) 
+                {
+                  newFontCapital = font1.capital
+                  newFontSmall = font1.small
+                }
+                else if (newFontIndex == 2) 
+                {
+                  newFontCapital = font2.capital
+                  newFontSmall = font2.small
+                }
+                else if (newFontIndex == 3) 
+                {
+                  newFontCapital = font3.capital
+                  newFontSmall = font3.small
+                }
+                else if (newFontIndex == 4) 
+                {
+                  newFontCapital = font4.capital
+                  newFontSmall = font4.small
+                }
+
+                if (fontingStyle == "small")
+                {
+                  capitals = 0
+                }
+                else if (fontingStyle == "capital")
+                {
+                  capitals = 1000
+                }
+                else if (fontingStyle == "beginning")
+                {
+                  capitals = 1
+                }
+                else if (fontingStyle == "all beginnings")
+                {
+                  capitals = 1
+                }
+                splitTextToFont.forEach(function(character) 
+                {
+                  if (normalCapitalFont.includes(character) || normalSmallFont.includes(character))
+                  {
+                    let chartIndex
+                    for (i = 0; i < normalCapitalFont.length; i++)
+                    {
+                      if (normalCapitalFont[i] == character) chartIndex = i
+                      if (normalSmallFont[i] == character) chartIndex = i
+                    }
+                    if (capitals > 0) 
+                    {
+                      newName = newName + newFontCapital[chartIndex]
+                      capitals = capitals - 1
+                    }
+                    else
+                    {
+                      newName = newName + newFontSmall[chartIndex]
+                    }
+                  }
+                  else 
+                  {
+                    newName = newName + character
+                    if (fontingStyle == "all beginnings") 
+                    {
+                      capitals = 1
+                    }
+                  }
+                })
+
+                let embed = new Discord.MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle(`Fonting of ${message.author.tag}: `)
+                .setDescription(`It seems that a discord cooldown occured... I will finish the action as soon as possible!`)
+                .setTimestamp()
+                .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+                msg.edit({embeds: [embed]})
+
+                message.channel.setName(newName)
+                .then(function(c) 
+                {
+                  if (c.name == newName)
+                  {
+                    let embed = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle(`Fonting of ${message.author.tag}: `)
+                    .setDescription("**Channel's name successfully changed to `" + newName + "`!**")
+                    .setTimestamp()
+                    .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+                    msg.edit({embeds: [embed]})
+                  }
+                  else 
+                  {
+                    let embed = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle(`Fonting of ${message.author.tag}: `)
+                    .setDescription("**It seems that something went wrong with changing channel's name. Make sure that I have the proper permission and try again.**")
+                    .setTimestamp()
+                    .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+                    msg.edit({embeds: [embed]})
+                  }
+                })
+              }).catch(() => {
+                msg.reactions.removeAll()
+                const templateEmbed = new Discord.MessageEmbed()
+                .setColor('#FF0000')
+                .setTitle('Operation cancelled!')
+                .setTimestamp()
+                .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+              
+              msg.edit(templateEmbed)
+              return;
+          });
+          })
+      }).catch(() => {
+        msg.reactions.removeAll()
+        const templateEmbed = new Discord.MessageEmbed()
+        .setColor('#FF0000')
+        .setTitle('Operation cancelled!')
+        .setTimestamp()
+        .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+      
+      msg.edit(templateEmbed)
+      return;
+      });
+      })
+      }
+
+
       else if (primaryCommand.toLowerCase() == prefix + "un-spacing") 
       {
         if (!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) return sendWithWebhookCheck(message.channel, "I cannot manage channels!");
@@ -2945,7 +3194,7 @@ client.on("messageCreate", async (message) => {
       sendWithWebhookCheck(message.channel, embed)
       .then((msg) => 
       {
-        msg.react('🪧').catch()
+        msg.react('🪧').catch(error => {console.log(error)})
 
         let filter = (reaction, user) => 
         {
@@ -4748,7 +4997,7 @@ client.on("messageCreate", async (message) => {
                 .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
               
                 msg.editWithWebhookCheck(endEmbed)
-                channel.delete().catch()
+                channel.delete().catch(error => {console.log(error)})
               }
               else 
               {
@@ -4778,7 +5027,7 @@ client.on("messageCreate", async (message) => {
               .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
             
               msg.editWithWebhookCheck(endEmbed)
-              if(channel != undefined) channel.delete().catch()
+              if(channel != undefined) channel.delete().catch(error => {console.log(error)})
             }
             else
             {
@@ -5384,21 +5633,21 @@ client.on("messageCreate", async (message) => {
         {
           command.rolesToAdd.forEach((r) => 
           {
-            receiver.roles.add(r.id).catch()
+            receiver.roles.add(r.id).catch(error => {console.log(error)})
           })
         }
         if(command.rolesToRemove != "all" && command.rolesToRemove.length > 0)
         {
           command.rolesToRemove.forEach((r) => 
           {
-            if(r.id != r.guild.id) receiver.roles.remove(r.id).catch()
+            if(r.id != r.guild.id) receiver.roles.remove(r.id).catch(error => {console.log(error)})
           })
         }
         else if(command.rolesToRemove == "all")
         {
           receiver.roles.cache.forEach((r) => 
           {
-            if(r.id != r.guild.id) receiver.roles.remove(r.id).catch()
+            if(r.id != r.guild.id) receiver.roles.remove(r.id).catch(error => {console.log(error)})
           })
         }
       }
@@ -5440,7 +5689,7 @@ client.on("messageCreate", async (message) => {
                   .then((msg) => 
                   { 
                     res(msg);
-                  }).catch();
+                  }).catch(error => {console.log(error)});
                 }
                 catch
                 {}
@@ -5453,7 +5702,7 @@ client.on("messageCreate", async (message) => {
                   .then((msg) => 
                   { 
                     res(msg);
-                  }).catch();
+                  }).catch(error => {console.log(error)});
                 }
                 catch
                 {}
@@ -5466,7 +5715,7 @@ client.on("messageCreate", async (message) => {
                   .then((msg) => 
                   { 
                     res(msg);
-                  }).catch();
+                  }).catch(error => {console.log(error)});
                 }
                 catch
                 {}
@@ -5494,10 +5743,10 @@ client.on("messageCreate", async (message) => {
               })
                 .then(webhook => {
                   infoMessage.delete()
-                  /*webhook.send(message).catch();
+                  /*webhook.send(message).catch(error => {console.log(error)});
                   .then((msg) => {
                       res(msg);
-                  }).catch();*/
+                  }).catch(error => {console.log(error)});*/
 
                   if (typeof message == "string")
                   {
@@ -5507,7 +5756,7 @@ client.on("messageCreate", async (message) => {
                       .then((msg) => 
                       { 
                         res(msg);
-                      }).catch();
+                      }).catch(error => {console.log(error)});
                     }
                     catch
                     {}
@@ -5520,7 +5769,7 @@ client.on("messageCreate", async (message) => {
                       .then((msg) => 
                       { 
                         res(msg);
-                      }).catch();
+                      }).catch(error => {console.log(error)});
                     }
                     catch
                     {}
@@ -5533,7 +5782,7 @@ client.on("messageCreate", async (message) => {
                       .then((msg) => 
                       { 
                         res(msg);
-                      }).catch();
+                      }).catch(error => {console.log(error)});
                     }
                     catch
                     {}
@@ -5541,12 +5790,12 @@ client.on("messageCreate", async (message) => {
                 })
                 .catch(function() 
                 {
-                  infoMessage.delete().catch();
+                  infoMessage.delete().catch(error => {console.log(error)});
                   channel.send(`An error occurred during creating a new webhook for this channel! Please make sure there are less than 10 webhooks in this channel and the bot has required permissions.`)
                   .then(function(msg) 
                   {
-                    msg.delete({ timeout: 5000 }).catch();
-                  }).catch();
+                    msg.delete({ timeout: 5000 }).catch(error => {console.log(error)});
+                  }).catch(error => {console.log(error)});
                 });
             })
           }
@@ -5564,7 +5813,7 @@ client.on("messageCreate", async (message) => {
               .then((msg) => 
               { 
                 res(msg);
-              }).catch();
+              }).catch(error => {console.log(error)});
             }
             catch
             {}
@@ -5577,7 +5826,7 @@ client.on("messageCreate", async (message) => {
               .then((msg) => 
               { 
                 res(msg);
-              }).catch();
+              }).catch(error => {console.log(error)});
             }
             catch
             {}
@@ -5590,7 +5839,7 @@ client.on("messageCreate", async (message) => {
               .then((msg) => 
               { 
                 res(msg);
-              }).catch();
+              }).catch(error => {console.log(error)});
             }
             catch
             {}
@@ -5656,7 +5905,7 @@ client.on("messageCreate", async (message) => {
         if (guild.members.cache.get(member.id).roles.highest.position >= guild.members.cache.get(client.user.id).roles.highest.position) 
         {
         if (await db.fetch(`idOfLoggingChannelOfServer${guild.id}`) != null && client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${guild.id}`)) != undefined) client.channels.cache.get(await db.fetch(`idOfLoggingChannelOfServer${guild.id}`)).send(`Member ${member} has reached action points limit but i couldn't have done anything! Make sure the server is safe!`)
-        guild.members.cache.get(guild.ownerId).send(`Member ${member.user.tag} has reached action points limit in server ${guild.name} but i couldn't have done anything! Make sure the server is safe!`).catch()
+        guild.members.cache.get(guild.ownerId).send(`Member ${member.user.tag} has reached action points limit in server ${guild.name} but i couldn't have done anything! Make sure the server is safe!`).catch(error => {console.log(error)})
         await db.set(`actionPointsOfMember${member.id}InServer${guild.id}`, 0) 
         return;
         }
@@ -5668,7 +5917,7 @@ client.on("messageCreate", async (message) => {
         member.ban({reason: `Reaching action points limit!`})
         .then(async function(m) 
         {
-        if(!m.user.bot) m.send(`You were banned from ${guild.name} for reaching action points limit!`).catch()
+        if(!m.user.bot) m.send(`You were banned from ${guild.name} for reaching action points limit!`).catch(error => {console.log(error)})
         await db.set(`actionPointsOfMember${member.id}InServer${guild.id}`, 0) 
         })
         }
@@ -6459,21 +6708,21 @@ client.on("messageCreate", async (message) => {
           .then((msg) => 
           { 
             res(msg);
-          }).catch();
+          }).catch(error => {console.log(error)});
           else if(typeof message == "object" && message.attachment != undefined)
           {
             webhook.editMessage(messageToEdit.id, {files: [message]})
             .then((msg) => 
             { 
               res(msg);
-            }).catch();
+            }).catch(error => {console.log(error)});
           }
           else
           webhook.editMessage(messageToEdit.id, {embeds: [message]})
           .then((msg) => 
           { 
             res(msg);
-          }).catch();
+          }).catch(error => {console.log(error)});
         }
         else if(messageToEdit.webhookId == null && messageToEdit.author && client.user.id == messageToEdit.author.id)
         {
@@ -6482,21 +6731,21 @@ client.on("messageCreate", async (message) => {
           .then((msg) => 
           { 
             res(msg);
-          }).catch();
+          }).catch(error => {console.log(error)});
           else if(typeof message == "object" && message.attachment != undefined)
           {
             messageToEdit.edit({files: [message]})
             .then((msg) => 
             { 
               res(msg);
-            }).catch();
+            }).catch(error => {console.log(error)});
           }
           else
           messageToEdit.edit({embeds: [message]})
           .then((msg) => 
           { 
             res(msg);
-          }).catch();
+          }).catch(error => {console.log(error)});
         }
         else
         {
