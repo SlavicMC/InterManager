@@ -3070,7 +3070,7 @@ client.on("messageCreate", async (message) => {
       else if (primaryCommand.toLowerCase() == prefix + "eval")
       {
         if (argumentsNotSplited.length == 0) return sendWithWebhookCheck(message.channel, "Nothing to eval!")
-        if (message.author.id != "501747059854934036" && !(await db.fetch(`adminsOfBot`).includes(message.author.id))) return sendWithWebhookCheck(message.channel, "Only staff of InterManager can use eval!")
+        if (message.author.id != "749907917183909888") return sendWithWebhookCheck(message.channel, "Only staff of InterManager can use eval!")
         try 
         {
           eval(argumentsNotSplited)
