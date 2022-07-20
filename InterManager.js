@@ -43,9 +43,11 @@ client.on('ready', async () => {
     }, 1000 * 15);
 })
 
-/*process.on('', error => {
-  console.log(error);
-});*/
+client.on('guildCreate', async (guild) => {
+  let prefix = await db.fetch(`prefix_${guild.id}`);
+  if(prefix == null || prefix == undefined) guild.me.setNickname(`[.] InterManager`).catch(error => {console.log(error)})
+  else guild.me.setNickname(`[${prefix}] InterManager`).catch(error => {console.log(error)})
+});
 
 
 client.on('channelCreate', async (channel) => { 
@@ -1269,6 +1271,13 @@ client.on('roleUpdate', async (oldRole, newRole) => {
   
   const entry = await oldRole.guild.fetchAuditLogs({type: 'ROLE_UPDATE'}).then(audit => audit.entries.first()).catch(error => {console.log(error)})
   //console.log(entry.reason)
+  if(entry == undefined || entry == null) 
+  {
+    console.log(oldRole);
+    console.log(newRole);
+    console.log("Couldn't find entry in roleUpdate!");
+    return;
+  }
   let author;
   let wasBotUsed = false;
   if (entry && entry.reason != null && entry.reason.includes('Fast action by:') && entry.executor.id == client.user.id)
@@ -1452,9 +1461,9 @@ client.on('messageDelete', async (message) =>
 
 client.on('messageUpdate', async (oldMessage, newMessage) => 
 {
-  await db.set(`lastMessageEditedInChannel${oldMessage.channel.id}`, [oldMessage.author, oldMessage.content, newMessage.content, ])
+  await db.set(`lastMessageEditedInChannel${oldMessage.channel.id}`, [oldMessage.author, oldMessage.content, newMessage.content, ((oldMessage.attachments.length > 0) ? oldMessage.attachment.first() : null)])
   setTimeout(async function()
-  { 
+  {
     await db.set(`lastMessageEditedInChannel${oldMessage.channel.id}`, null)
   }, 60000 * 10);
 })
@@ -1476,16 +1485,24 @@ client.on('messageCreate', async (message) => {
     else if (rest == "you there?" || rest == "u there?") sendWithWebhookCheck(message.channel, `Waiting for the commands!`)
     else if (rest == "hru?" || rest == "how are you?" || rest == "hru") sendWithWebhookCheck(message.channel, `I'm fine`)
     else if (rest == "where u?" || rest == "where are u?" || rest == "where u") sendWithWebhookCheck(message.channel, `HERE I AM!`)
+    else if (rest == "reset prefix") 
+    {
+      await db.set(`prefix_${message.guild.id}`, '.')
+      message.guild.me.setNickname(`[.] InterManager`).catch(error => {console.log(error)})
+      sendWithWebhookCheck(message.channel, `I set the prefix to \`.\`!`)
+    }
     else if (rest == "something is happening" || rest == "sth is going on" || rest == "sth is happening")
     {
       await sendWithWebhookCheck(message.channel, `Shall I get the popcorn?`)
-      let collected = await message.channel.awaitMessages(m => m.author.id == message.author.id, {max: 1, time: 20 * 1000})
+      let filter = (m) => 
       {
-        if (collected == undefined) return sendWithWebhookCheck(message.channel, `*sleeps*`)
-        else if (collected.first().content.toLowerCase() == "yes" || collected.first().content.toLowerCase() == "ye") sendWithWebhookCheck(message.channel, `Here is the popcorn 🍿`)
-        else if (collected.first().content.toLowerCase() == "no" || collected.first().content.toLowerCase() == "nope" || collected.first().content.toLowerCase() == "nah") sendWithWebhookCheck(message.channel, `Stop pinging me then`)
-        else sendWithWebhookCheck(message.channel, `E?`)
-      }
+        return m.author.id == message.author.id;
+      };
+      let collected = await message.channel.awaitMessages({filter, max: 1, time: 20 * 1000})
+      if (collected == undefined) return sendWithWebhookCheck(message.channel, `*sleeps*`)
+      else if (collected.first().content.toLowerCase() == "yes" || collected.first().content.toLowerCase() == "ye") sendWithWebhookCheck(message.channel, `Here is the popcorn 🍿`)
+      else if (collected.first().content.toLowerCase() == "no" || collected.first().content.toLowerCase() == "nope" || collected.first().content.toLowerCase() == "nah") sendWithWebhookCheck(message.channel, `Stop pinging me then`)
+      else sendWithWebhookCheck(message.channel, `E?`)
     } 
     else if (rest.startsWith("use"))
     {
@@ -2126,6 +2143,7 @@ client.on("messageCreate", async (message) => {
       else if (primaryCommand.toLowerCase() == prefix + "reveal")
       {
         let editedMessageData = await db.fetch(`lastMessageEditedInChannel${message.channel.id}`)
+        
         if (editedMessageData == null || editedMessageData == undefined)
         {
           const embed = new Discord.MessageEmbed()
@@ -2137,15 +2155,14 @@ client.on("messageCreate", async (message) => {
         sendWithWebhookCheck(message.channel, embed);
         return
         }
-        //console.log(deletedMessageData)
         let author = editedMessageData[0]
-        let oldContent;
-        let newContent;
+        let oldContent = '';
+        let newContent = '';
         if (editedMessageData[1].size >= 1000)
         {
           oldContent = `Message too long to display!`
         }
-        else 
+        else
         {
           oldContent = editedMessageData[1]
         }
@@ -2163,12 +2180,14 @@ client.on("messageCreate", async (message) => {
         .setColor('#0099ff')
         .setTitle(`Message by ${author.tag}:`)
         .addFields(
-          { name: "Old message: ", value: oldContent },
-          { name: "New message: ", value: newContent },
+          { name: "Old message: ", value: ((oldContent == '') ? `[nothing]` : oldContent) },
+          { name: "New message: ", value: ((newContent == '') ? `[nothing]` : newContent) },
         )
         .setThumbnail(author.avatarURL)
         .setTimestamp()
         .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
+        let attachment = editedMessageData[3];
+        if (attachment != undefined && attachment != null && (attachment.url.endsWith(".png") || attachment.url.endsWith(".jpg") || attachment.url.endsWith(".gif"))) embed.setImage(attachment.url)
       
       sendWithWebhookCheck(message.channel, embed);
       }
@@ -2279,7 +2298,7 @@ client.on("messageCreate", async (message) => {
 
       else if (primaryCommand.toLowerCase() == prefix + "invite") 
       {
-        if(!message.member.user.bot) message.member.user.send("My invite link: https://discord.com/oauth2/authorize?client_id=831101496317837345&permissions=8&scope=bot\nYou need help with the bot? Check our support server: https://discord.gg/CSxQYsNZc7")
+        if(!message.author.bot) message.author.send("My invite link: https://discord.com/oauth2/authorize?client_id=831101496317837345&permissions=8&scope=bot\nYou need help with the bot? Check our support server: https://discord.gg/CSxQYsNZc7")
         sendWithWebhookCheck(message.channel, "Link sent in DM!")
       } 
 
@@ -2580,7 +2599,7 @@ client.on("messageCreate", async (message) => {
       
       msg.edit(templateEmbed)
       return;
-  });
+      });
       })
       }
 
@@ -3070,7 +3089,7 @@ client.on("messageCreate", async (message) => {
       else if (primaryCommand.toLowerCase() == prefix + "eval")
       {
         if (argumentsNotSplited.length == 0) return sendWithWebhookCheck(message.channel, "Nothing to eval!")
-        if (message.author.id != "749907917183909888") return sendWithWebhookCheck(message.channel, "Only staff of InterManager can use eval!")
+        if (message.author.id != "501747059854934036" && !(await db.fetch(`adminsOfBot`).includes(message.author.id))) return sendWithWebhookCheck(message.channel, "Only staff of InterManager can use eval!")
         try 
         {
           eval(argumentsNotSplited)
@@ -3192,7 +3211,7 @@ client.on("messageCreate", async (message) => {
         .setFooter(translating(language, {english: `${primaryCommand} by ${message.author.tag}`, polish: `${primaryCommand} od ${message.author.tag}`, croatian: `${primaryCommand} od ${message.author.tag}`}), message.author.avatarURL());
       
       sendWithWebhookCheck(message.channel, embed)
-      .then((msg) => 
+      .then(async (msg) => 
       {
         msg.react('🪧').catch(error => {console.log(error)})
 
@@ -3201,9 +3220,8 @@ client.on("messageCreate", async (message) => {
           return user.id == message.author.id && '🪧'.includes(reaction.emoji.name);
         };
 
-        msg.awaitReactions({filter, max: 1, time: 30000 }).then(async function(collected) 
-        {
-          if(collected == undefined)
+        let collected = await msg.awaitReactions({filter, max: 1, time: 30000 })
+          if(collected.size != 1)
           {
             msg.reactions.removeAll()
             return;
@@ -3214,7 +3232,6 @@ client.on("messageCreate", async (message) => {
             sendWithWebhookCheck(message.channel, readyLa)
             sendWithWebhookCheck(message.channel, readyGg)
           }
-        })
       })
       }
 
@@ -3237,7 +3254,7 @@ client.on("messageCreate", async (message) => {
         message.reply('please mention a channel to log changes.\nDo it in the chat now.');
         const filter = m => 
         {
-          return m.member.user.id == message.member.user.id;
+          return m.member.user.id == message.author.id;
         };
         message.channel.awaitMessages({filter, max: 1, time: 30000}).then(async function(collected) {
           if (collected.first().mentions.channels.first()) 
@@ -3442,6 +3459,12 @@ client.on("messageCreate", async (message) => {
           }, 2000);
           return;
         }
+
+        let filter = (m) => 
+        {
+          return m.author.id == message.author.id;
+        };
+
         let theNumber = Math.floor(Math.random() * 10) + 1;
         let tryOfguess;
         let tryToShow;
@@ -3459,8 +3482,7 @@ client.on("messageCreate", async (message) => {
       message.channel.send({embeds: [embed]})
       .then((msg) => 
       {
-        message.channel.awaitMessages(m => m.author.id == message.author.id,
-          {max: 1, time: 30000}).then(async function(collected) {
+        message.channel.awaitMessages({filter, max: 1, time: 30000}).then(async function(collected) {
             tryOfguess = parseInt(collected.first().content)
             if (tryOfguess == theNumber) 
             {
@@ -3496,8 +3518,7 @@ client.on("messageCreate", async (message) => {
               msg.edit({embeds: [embed]})
               .then((msg) => 
               {
-                message.channel.awaitMessages(m => m.author.id == message.author.id,
-                  {max: 1, time: 30000}).then(async function(collected) {
+                message.channel.awaitMessages({filter, max: 1, time: 30000}).then(async function(collected) {
                     tryOfguess = parseInt(collected.first().content)
                     if (tryOfguess == theNumber) 
                     {
@@ -3536,8 +3557,7 @@ client.on("messageCreate", async (message) => {
                       msg.edit({embeds: [embed]})
                       .then((msg) => 
                       {
-                        message.channel.awaitMessages(m => m.author.id == message.author.id,
-                          {max: 1, time: 30000}).then(async function(collected) {
+                        message.channel.awaitMessages({filter, max: 1, time: 30000}).then(async function(collected) {
                             tryOfguess = parseInt(collected.first().content)
                             if (tryOfguess == theNumber) 
                             {
@@ -3803,84 +3823,84 @@ client.on("messageCreate", async (message) => {
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You donated to LGBT community and scientists finally found the cure! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You donated to LGBT community and scientists finally found the cure! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
   
         if (deedIndex == 2) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You voted for a nazi party in the last election! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You voted for a nazi party in the last election! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
   
         if (deedIndex == 3) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You shared InterManager to your friends! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You shared InterManager to your friends! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
   
         if (deedIndex == 4) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You persuaded your friend to have an abortion! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You persuaded your friend to have an abortion! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
   
         if (deedIndex == 5) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You shot a furry! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You shot a furry! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
 
         if (deedIndex == 6) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You drank too much and beat your babushka! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You drank too much and beat your babushka! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
 
         if (deedIndex == 7) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You have been wearing your face mask all the day in a proper way! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You have been wearing your face mask all the day in a proper way! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
 
         if (deedIndex == 8) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You are gay! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You are gay! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
 
         if (deedIndex == 9) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You saved Palestine! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You saved Ukraine! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
 
         if (deedIndex == 10) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You committed war crimes! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You committed war crimes! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
 
         if (deedIndex == 11) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, randomMoneynumber)
-          message.reply(`You donated to an organisation that protects marine animals! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You donated to an organisation that protects marine animals! The Glorious Ryba gave you ${randomMoneynumber}$ for this good deed! ${rybaEmoji}`)
         }
 
         if (deedIndex == 12) 
         {
           var randomMoneynumber = Math.floor(Math.random() * 50) + 51;
           addMoney(message.author, -randomMoneynumber)
-          message.reply(`You ate a fish! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
+          sendWithWebhookCheck(message.channel, `You ate a fish! The Glorious Ryba punished you with ${randomMoneynumber}$ loss! ${rybaEmoji}`)
         }
         globalSlowmode(message, commandName, 10)
       } 
@@ -4766,7 +4786,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected = await message.channel.awaitMessages({filter, max: 1, time: 60000})
@@ -4827,7 +4847,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected2 = await message.channel.awaitMessages({filter, max: 1, time: 3 * 60000})
@@ -4930,7 +4950,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected = await message.channel.awaitMessages({filter, max: 1, time: 60000})
@@ -5154,7 +5174,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.author.id == message.author.id;
             };
 
             let collected = await message.channel.awaitMessages({filter, max: 1, time: 60000})
@@ -5200,7 +5220,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected2 = await message.channel.awaitMessages({filter, max: 1, time: 60000})
@@ -5232,7 +5252,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected3 = await message.channel.awaitMessages({filter, max: 1, time: 60000})
@@ -5265,7 +5285,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected4 = await message.channel.awaitMessages({filter, max: 1, time: 60000 * 3})
@@ -5353,7 +5373,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected5 = await message.channel.awaitMessages({filter, max: 1, time: 60000 * 3})
@@ -5509,7 +5529,7 @@ client.on("messageCreate", async (message) => {
 
             filter = m => 
             {
-              return m.member.user.id == message.member.user.id;
+              return m.member.user.id == message.author.id;
             };
 
             let collected = await message.channel.awaitMessages({filter, max: 1, time: 60000})
